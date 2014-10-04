@@ -1,0 +1,17 @@
+---
+title: "HPOG-RStudio"
+Xiaomeng Chai
+10-04-2014
+---
+
+```{r}
+hpog <- read.csv(file= "C:/Users/Kevin/Desktop/HPOG_ClassStudents_R.csv", head=TRUE)
+#summary(hpog)
+#names(hpog)
+#sort data by ascending 'case' and descending 'TIME'
+attach(hpog)
+hpog.sort <- hpog[order(case, -TIME),]
+#hpog.sort[1:10,1:6]
+h2<-hpog.sort[!duplicated(hpog.sort$case),]
+h2[1:10,1:6]
+```
