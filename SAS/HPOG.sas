@@ -1,4 +1,4 @@
-**************************10-03-14 X.CHAI*****************************;
+**************************10-05-14 X.CHAI*****************************;
 proc import out=work.hpog
 	datafile="C:\Users\xchai\Desktop\HPOG_ClassStudents_Adj.xlsx"
 	dbms=xlsx;
@@ -11,11 +11,8 @@ Proc sort data=work.hpog out=work.hpog_sort;
 run;
 ****delete duplicates, keep the the latest record for each subject***;
 proc sort data=work.hpog_sort out=work.hpog_nodu nodupkey equals;
-by case_;
+ by case_;
 run;
-/*proc print data=work.hpog_nodu (obs=30);
-run;*/
-
 *****Logistic model 10-03-14 X.CHAI*****;
 data hpog_logistic;
 	set work.hpog_nodu;
@@ -31,22 +28,24 @@ data hpog_logistic;
 proc genmod data = hpog_logistic; 
 model y/n = EB_avg EH_avg SS_avg R_avg SEF_avg/ dist=bin link=logit; 
 run;
-****calculate max-to-min date difference for each subject****;
-proc sql;
-	create table newdate as
-select case_, max(DATE)format=date10., min(DATE) format=date10.,max(DATE)-min(DATE)as datediff
-		from work.hpog
-		group by case_;
-quit;
-****Add a new column 'datediff' onto the dataset****; 
-data mergedatediff;
-merge work.hpog_nodu newdate;
-by case_;
-run;
 
-***********CPH 10-03-14 X.CHAI********************;
-data work.hpog_CPH09_29_14;
-	set mergedatediff;
+****Add 'datediff' to work.hpog_nodu****;
+proc sql;
+	create table merge as
+		select * from work.hpog_nodu A
+		inner join
+			(select case_,max(DATE)-min(DATE)as datediff
+			from work.hpog
+			group by case_) B
+		on A.case_ = B.case_ ;
+quit;
+/*proc print data=merge (obs=7);
+var case_ TIME datediff;
+run;*/
+
+***********CPH 10-05-14 X.CHAI********************;
+data work.CPH10_05_14;
+	set merge;
 	EB_avg=mean(of EB1-EB27);
 	EH_avg=mean(of EH1-EH27);
 	SS_avg=mean(of SS1-SS14);
@@ -55,9 +54,9 @@ data work.hpog_CPH09_29_14;
 	if STATUS=0 then STATUS_NEW=1; 
 	else STATUS_NEW=0;
 run;
-proc phreg data=work.hpog_CPH09_29_14 plots=survival;
+proc phreg data=work.CPH10_05_14 plots=survival;
 	model datediff*STATUS_NEW(0)=EB_avg EH_avg SS_avg R_avg SEF_avg;
 run;
-*******************END 10-03-14 X.CHAI******************************;
+*******************END 10-05-14 X.CHAI******************************;
 
-
+	
