@@ -2,7 +2,7 @@
 output: word_document
 ---
 ```{r}
-hpog <- read.csv(file= "C:/Users/xchai/Desktop/HPOG_ClassStudents_R.csv", head=TRUE)
+hpog <- read.csv(file= "C:/Users/Kevin/Desktop/HPOG_ClassStudents_R.csv", head=TRUE)
 #summary(hpog)
 #names(hpog)
 #sort data by ascending 'case' and descending 'TIME'
@@ -43,12 +43,16 @@ summary(logisticmod)
 **CPH model (time till Drop-out) on EBmean and EHmean**
 ```{r}
 #by--didn't work
-h2$maxtime<- == max(DATE)],by=case]$V1]
-head(h2$maxtime)
+#h2$maxtime<- == max(DATE)],by=case]$V1]
+#head(h2$maxtime)
 
 #aggregate?
-maxdate<-aggregate(hpog.sort,by=list(DATE),fun=max,na.rm=TRUE)
-head(maxdate)
+
+#convert strings into date
+head(as.Date(hpog.sort$DATE,"%d-%b-%y"))
+
+#maxdate<-aggregate(as.Date(hpog.sort$DATE,"%d-%b-%y"),by=list(case,EB2),FUN=max,na.rm=TRUE)
+#maxdate[order(Group.1)]
 
 
 ```
