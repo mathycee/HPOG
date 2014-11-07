@@ -1,3 +1,6 @@
+---
+output: word_document
+---
 ```{r}
 hpog <- read.csv(file= "C:/Users/xchai/Desktop/HPOG_ClassStudents_R.csv", head=TRUE)
 #summary(hpog)
@@ -21,3 +24,37 @@ h2<-hpog.sort[!duplicated(hpog.sort$case),]
 h2$dropstatus <- ifelse(h2$STATUS==0, 1, 0)
 h2[1:10, 100:110]
 ```
+
+**create mean of EB and EH with some items removed per Dr. Hong's request**
+```{r}
+h2$EBmean<-rowMeans(subset(h2,select=c(EB1:EB4,EB6,EB8,EB10:EB13,EB15:EB19,EB22:EB26)),na.rm=TRUE)
+head(h2$EBmean)
+
+h2$EHmean<-rowMeans(subset(h2,select=c(EH3:EH6,EH11,EH15,EH17:EH24)),na.rm=TRUE)
+head(h2$EHmean)
+```
+
+**logistic regression of dropout on EBmean and EHmean **
+```{r}
+logisticmod<-glm(dropstatus~EBmean+EHmean,family=binomial(logit),data=h2)
+summary(logisticmod)
+```
+
+**CPH model (time till Drop-out) on EBmean and EHmean**
+```{r}
+#by--didn't work
+h2$maxtime<- == max(DATE)],by=case]$V1]
+head(h2$maxtime)
+
+#aggregate?
+maxdate<-aggregate(hpog.sort,by=list(DATE),fun=max,na.rm=TRUE)
+head(maxdate)
+
+
+```
+
+
+
+
+
+
