@@ -42,22 +42,35 @@ summary(logisticmod)
 
 **CPH model (time till Drop-out) on EBmean and EHmean**
 ```{r}
-#by--didn't work
-#h2$maxtime<- == max(DATE)],by=case]$V1]
-#head(h2$maxtime)
-
-#aggregate?
-
+#aggregate
 #convert strings into date
-head(as.Date(hpog.sort$DATE,"%d-%b-%y"))
 
-#maxdate<-aggregate(as.Date(hpog.sort$DATE,"%d-%b-%y"),by=list(case,EB2),FUN=max,na.rm=TRUE)
-#maxdate[order(Group.1)]
+maxdate<-aggregate(as.Date(hpog.sort$DATE,"%d-%b-%Y"),by=list(hpog.sort$case),FUN=max,na.rm=TRUE)
+head(maxdate)
+#maxdate[1:5,]
 
+mindate<-aggregate(as.Date(hpog.sort$DATE,"%d-%b-%Y"),by=list(hpog.sort$case),FUN=min,na.rm=TRUE)
+head(mindate)
 
+#add datediff column into h2 
+case<-c(maxdate[,1])
+max.minus.min<-c(maxdate[,2]-mindate[,2])
+date<-data.frame(case,max.minus.min)
+#date[1:50,]
+
+h3<-merge(h2,date,by="case")
+names(h3)
+h3$max.minus.min[1:30]
 ```
 
+**Fit CPH model on EBmean and EHmean**
+```{r}
+library(survival)
+attach(h3)
+CPHmod1<-coxph(Surv(max.minus.min,dropstatus==1)~EBmean+EHmean,data=h3)
+summary(CPHmod1)
 
+```
 
 
 
