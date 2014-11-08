@@ -66,8 +66,8 @@ h3$max.minus.min[1:30]
 **Fit CPH model on EBmean and EHmean**
 ```{r}
 library(survival)
-attach(h3)
-CPHmod1<-coxph(Surv(max.minus.min,dropstatus==1)~EBmean+EHmean,data=h3)
+#efron or breslow?
+CPHmod1<-coxph(Surv(max.minus.min,dropstatus==1)~EBmean+EHmean,ties="breslow",data=h3)
 summary(CPHmod1)
 
 ```
