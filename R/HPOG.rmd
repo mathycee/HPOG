@@ -2,7 +2,7 @@
 output: word_document
 ---
 ```{r}
-hpog <- read.csv(file= "C:/Users/xchai/Desktop/HPOG_ClassStudents_R.csv", head=TRUE)
+hpog <- read.csv(file= "C:/Users/Kevin/Desktop/HPOG_ClassStudents_R.csv", head=TRUE)
 #summary(hpog)
 #names(hpog)
 #sort data by ascending 'case' and descending 'TIME'
@@ -112,9 +112,20 @@ names(h3)
 library(survival)
 CPHmod2<-coxph(Surv(max.minus.min,dropstatus==1)~EB1mean+EB2mean+EB3mean+EB4mean+EB5mean+EH1mean+EH2mean+EH3mean+EH4mean,ties="breslow",data=h3)
 summary(CPHmod2)
-
 ```
 
+**ESS as dependent variable**
+```{r}
+newh2<-h2[which(h2$Employed!="NA" & h2$PayBills!="NA" & h2$Welfare!="NA"),]
+newh2$newvar<-ifelse(newh2$Employed==1 & newh2$PayBills==1 & newh2$Welfare==0, 1, 0)
+#head(newh2$newvar)
 
+newh2$SSmean<-rowMeans(subset(newh2,select=c(SS1:SS15)),na.rm=TRUE)
+
+regfit<-lm(SSmean~newvar+dropstatus, data=newh2)
+summary(regfit)
+plot(regfit)
+
+```
 
 
