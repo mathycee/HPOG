@@ -2,7 +2,7 @@
 output: word_document
 ---
 ```{r}
-hpog <- read.csv(file= "C:/Users/Kevin/Desktop/HPOG_ClassStudents_R.csv", head=TRUE)
+hpog <- read.csv(file= "C:/Users/xchai/Desktop/HPOG_ClassStudents_R.csv", head=TRUE)
 #summary(hpog)
 #names(hpog)
 #sort data by ascending 'case' and descending 'TIME'
@@ -36,15 +36,13 @@ head(h2$EHmean)
 
 **logistic regression of dropout on EBmean and EHmean **
 ```{r}
-logisticmod<-glm(dropstatus~EBmean+EHmean,family=binomial(logit),data=h2)
-summary(logisticmod)
+logisticmod1<-glm(dropstatus~EBmean+EHmean,family=binomial(logit),data=h2)
+summary(logisticmod1)
 ```
 
 **CPH model (time till Drop-out) on EBmean and EHmean**
 ```{r}
-#aggregate
-#convert strings into date
-
+#aggregate--works!
 maxdate<-aggregate(as.Date(hpog.sort$DATE,"%d-%b-%Y"),by=list(hpog.sort$case),FUN=max,na.rm=TRUE)
 head(maxdate)
 #maxdate[1:5,]
@@ -62,13 +60,58 @@ h3<-merge(h2,date,by="case")
 names(h3)
 h3$max.minus.min[1:30]
 ```
-
 **Fit CPH model on EBmean and EHmean**
 ```{r}
 library(survival)
 #efron or breslow?
 CPHmod1<-coxph(Surv(max.minus.min,dropstatus==1)~EBmean+EHmean,ties="breslow",data=h3)
 summary(CPHmod1)
+
+```
+
+**regrouping EB and EH**
+```{r}
+h2$EB1mean<-rowMeans(subset(h2,select=c(EB10:EB13)),na.rm=TRUE)
+h2$EB2mean<-rowMeans(subset(h2,select=c(EB15:EB17)),na.rm=TRUE)
+h2$EB3mean<-rowMeans(subset(h2,select=c(EB6,EB18:EB19)),na.rm=TRUE)
+h2$EB4mean<-rowMeans(subset(h2,select=c(EB1:EB4,EB8)),na.rm=TRUE)
+h2$EB5mean<-rowMeans(subset(h2,select=c(EB22:EB26)),na.rm=TRUE)
+h2$EH1mean<-rowMeans(subset(h2,select=c(EH3:EH6)),na.rm=TRUE)
+h2$EH2mean<-rowMeans(subset(h2,select=c(EH11,EH15)),na.rm=TRUE)
+h2$EH3mean<-rowMeans(subset(h2,select=c(EH17:EH20)),na.rm=TRUE)
+h2$EH4mean<-rowMeans(subset(h2,select=c(EH21:EH24)),na.rm=TRUE)
+```
+
+
+
+**Logistic model with separated EBmean and EHmean**
+```{r}
+logisticmod2<-glm(dropstatus~EB1mean+EB2mean+EB3mean+EB4mean+EB5mean+EH1mean+EH2mean+EH3mean+EH4mean,family=binomial(logit),data=h2)
+summary(logisticmod2)
+```
+
+**CPH model with separated EBmean and EHmean**
+```{r}
+#aggregate--works!
+maxdate<-aggregate(as.Date(hpog.sort$DATE,"%d-%b-%Y"),by=list(hpog.sort$case),FUN=max,na.rm=TRUE)
+head(maxdate)
+#maxdate[1:5,]
+
+mindate<-aggregate(as.Date(hpog.sort$DATE,"%d-%b-%Y"),by=list(hpog.sort$case),FUN=min,na.rm=TRUE)
+head(mindate)
+
+#add datediff column into h2 
+case<-c(maxdate[,1])
+max.minus.min<-c(maxdate[,2]-mindate[,2])
+date<-data.frame(case,max.minus.min)
+#date[1:50,]
+
+h3<-merge(h2,date,by="case")
+names(h3)
+#h3$max.minus.min[1:30]
+library(survival)
+CPHmod2<-coxph(Surv(max.minus.min,dropstatus==1)~EB1mean+EB2mean+EB3mean+EB4mean+EB5mean+EH1mean+EH2mean+EH3mean+EH4mean,ties="breslow",data=h3)
+summary(CPHmod2)
 
 ```
 
